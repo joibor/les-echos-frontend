@@ -1,10 +1,13 @@
 import Grid from '@mui/material/Grid2'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
-import { NEWSLETTER_ITEMS } from '@/mocks/newsletters'
-import { NewsletterCard } from '@/components/NewsletterCard/NewsletterCard'
-import { groupBySite, objectEntries, type CategorySite } from '@/utils/newsletters'
+import { NEWSLETTER_ITEMS } from '@/mocks/newsletters.ts'
+import { NewsletterCard } from '@/components/NewsletterCard/NewsletterCard.tsx'
+import { groupBySite, objectEntries } from '@/utils/newsletters.ts'
+import { useUserContext } from '@/context/UserContext'
+import { useSubscriptionState } from '@/context/SubscriptionContext'
 
+import type { CategorySite } from '@/types/newsletter'
 import type { JSX } from 'react'
 
 const SIZE_COLUMN = { xs: 12, md: 6, lg: 4 }
@@ -17,6 +20,8 @@ const SITE_NAME: Record<CategorySite, string> = {
 }
 
 export const Home = (): JSX.Element => {
+  const { state: userState } = useUserContext()
+  const { subscribedNewsletterIds } = useSubscriptionState()
   const grouped = groupBySite(NEWSLETTER_ITEMS)
 
   return (
@@ -36,7 +41,13 @@ export const Home = (): JSX.Element => {
                     id={newsletter.id}
                     title={newsletter.title}
                     description={newsletter.description}
-                    requiredRights={newsletter.subscriptions}
+                    hasAccess={
+                      newsletter.subscriptions.length === 0 ||
+                      newsletter.subscriptions.some((right) =>
+                        userState.currentUser.subscriptions.includes(right)
+                      )
+                    }
+                    isSubscribed={subscribedNewsletterIds.includes(newsletter.id)}
                   />
                 </Grid>
               ))}
