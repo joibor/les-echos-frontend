@@ -9,7 +9,7 @@ const initialState: SubscriptionState = {
   subscribedNewsletterIds: [],
 }
 
-const SubscriptionActionTypes = {
+export const SubscriptionActionTypes = {
   ADD_SUBSCRIPTION: 'ADD_SUBSCRIPTION',
   REMOVE_SUBSCRIPTION: 'REMOVE_SUBSCRIPTION',
   RESET: 'RESET',
@@ -69,5 +69,3 @@ export const useSubscriptionDispatch = (): Dispatch<SubscriptionAction> => {
     throw new Error('useSubscriptionDispatch must be used within a SubscriptionProvider')
   return context
 }
-
-export { SubscriptionActionTypes }
