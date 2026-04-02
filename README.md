@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# Les Echos — Newsletter Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface de gestion des abonnements aux newsletters des Echos, Investir, Le Parisien et LVMH.
 
-Currently, two official plugins are available:
+## Prérequis
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Node.js 22 ou supérieur** — requis pour la compatibilité avec les dépendances du projet
 
-## React Compiler
+## Stack technique
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Outil                                               | Version | Rôle                  |
+| --------------------------------------------------- | ------- | --------------------- |
+| [React](https://react.dev/)                         | 19      | UI                    |
+| [TypeScript](https://www.typescriptlang.org/)       | 5.7     | Typage statique       |
+| [Vite](https://vite.dev/)                           | 6       | Bundler & dev server  |
+| [Material UI](https://mui.com/)                     | 6       | Composants UI         |
+| [Styled Components](https://styled-components.com/) | 6       | Styles des composants |
+| [React Router](https://reactrouter.com/)            | 7       | Routing               |
+| [Vitest](https://vitest.dev/)                       | 3       | Tests unitaires       |
+| [Testing Library](https://testing-library.com/)     | 16      | Utilitaires de test   |
 
-## Expanding the ESLint configuration
+## Architecture
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Structure des dossiers
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Les fichiers sont organisés par responsabilité. `components` contient les composants réutilisables, `pages` les vues associées aux routes, `context` le state global, `types` les interfaces TypeScript partagées, et `utils` les fonctions pures sans dépendance React.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Choix des contexts
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Le state global est séparé en deux contexts : `UserContext` pour le profil courant, et `SubscriptionContext` pour les abonnements aux newsletters. Ce découpage évite qu'un changement d'abonnement ne re-rende des composants qui n'utilisent que le profil utilisateur, et inversement.
+
+`SubscriptionContext` est lui-même divisé en deux providers distincts — un pour le state, un pour le dispatch. Le dispatch de `useReducer` étant une référence stable, les composants qui n'ont besoin que d'écrire (comme `Header` au reset) ne re-rendent pas quand l'état des abonnements change.
+
+### Flux de données
+
+`Home` est le seul composant qui lit les deux contexts. Il calcule `hasAccess` et `isSubscribed` pour chaque newsletter et transmet ces valeurs en props aux cartes. Les `NewsletterCard` sont ainsi isolées des contexts et enveloppées dans `React.memo` — elles ne re-rendent que si leurs props ont réellement changé.
+
+## Installation
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Commandes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Lancer le serveur de développement
+npm run dev
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Compiler pour la production
+npm run build
+
+# Prévisualiser le build de production
+npm run preview
+
+# Lancer les tests
+npm run test
+
+# Lancer les tests avec couverture de code
+npm run test:coverage
+
+# Linter
+npm run lint
+
+# Formatter le code
+npm run format
 ```

@@ -1,18 +1,19 @@
 import { Routes, Route } from 'react-router-dom'
-
-function HomePage() {
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h1 className="text-4xl font-bold">Les Echos Frontend</h1>
-      <p className="text-gray-500">Vite + React 19 + Tailwind CSS v4</p>
-    </main>
-  )
-}
+import { ErrorBoundary } from 'react-error-boundary'
+import { Layout } from '@/components/Layout/Layout'
+import { Home } from '@/pages/Home/Home.tsx'
+import { NotFound } from '@/pages/NotFound/NotFound.tsx'
+import { ErrorFallback } from '@/components/ErrorFallback/ErrorFallback.tsx'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-    </Routes>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   )
 }
